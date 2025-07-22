@@ -1,35 +1,23 @@
-# player.py
-# Tobias Mullins
-# CSC-220: Final Project
-# July 22, 2025
-
-
 from die import Die
 
 class Player:
-    
     def __init__(self, name):
         self.name = name
         self.totalScore = 0
-        self.dice = []       
-        self.heldDice = []  
+        self.dice = []
+        self.heldDice = []
         self.onBoard = False
-        
 
     def rollDice(self):
         numToRoll = 6 - len(self.heldDice)
         self.dice = [Die() for _ in range(numToRoll)]
 
-    def hold(self, diceValuesToKeep):
-        keptDieObjects = []
-        for value in diceValuesToKeep:
-            for dieObject in self.dice:
-                if dieObject.getValue() == value:
-                    keptDieObjects.append(dieObject)
-                    self.dice.remove(dieObject) # Remove it so it can't be matched again
-                    break # Move to the next value to keep
-        
-        self.heldDice.extend(keptDieObjects)
+    def hold(self, diceIndices):
+        diceToMove = []
+        for index in sorted(diceIndices, reverse = True):
+            if 0 <= index < len(self.dice):
+                diceToMove.append(self.dice.pop(index))
+        self.heldDice.extend(diceToMove)
 
     def resetDice(self):
         self.dice = []
