@@ -60,15 +60,14 @@ class Game:
                 if not choices or any(c < 1 or c > len(scoringGroups) for c in choices):
                     raise ValueError("Invalid choice.")
 
-                # Process valid choices
                 tempDiceToKeep = []
-                for choice in set(choices): # Use set to avoid duplicate choices
+                for choice in set(choices):
                     score, diceList = scoringGroups[choice - 1]
                     scoreThisRound += score
                     tempDiceToKeep.extend(diceList)
                 
                 diceToKeep = tempDiceToKeep
-                break # Exit validation loop
+                break
 
             except (ValueError, IndexError):
                 print("Invalid input. Please enter numbers from the list, separated by commas.")
@@ -79,12 +78,21 @@ class Game:
         print(f"\nYou kept {sorted(diceToKeep)}, earning {scoreThisRound} points.")
         print(f"Total for this turn so far: {currentTurnTotal}")
 
-        # Check if all dice have been held
         if len(self.p.heldDice) == 6:
             print("Hot hand! All your dice scored. Rolling 6 again.")
             self.p.resetDice()
             self.takeTurn(currentTurnTotal)
             return
+
+        # --- NEW RULE IMPLEMENTATION ---
+        # Force player to roll if they are not on the board and have less than 1000 points.
+        if not self.p.onBoard and currentTurnTotal < 1000:
+            print(f"\nNot on the board and you only have {currentTurnTotal} points this turn.")
+            print("You must continue rolling until you reach 1000 points or Zilch.")
+            input("Press Enter to roll again...")
+            self.takeTurn(currentTurnTotal)
+            return
+        # --- END OF NEW RULE ---
 
         goAgain = input("Roll again? (y/n): ")
         if goAgain.lower() == "y":
@@ -107,11 +115,9 @@ class Game:
             self.currentPlayer = 0
 
     def findScoringGroups(self, diceValues):
-        """Finds all possible scoring groups and returns them as a list."""
         groups = []
         counts = Counter(diceValues)
         
-        # Handle 6-dice combos first, as they are exclusive
         if len(diceValues) == 6:
             if len(counts) == 6:
                 groups.append((1500, sorted(diceValues)))
@@ -120,7 +126,6 @@ class Game:
                 groups.append((1500, sorted(diceValues)))
                 return groups
 
-        # Find N-of-a-kind
         remainingValues = list(diceValues)
         for val, count in counts.items():
             if count >= 3:
@@ -132,11 +137,10 @@ class Game:
                     baseScore = val * 100
                     score = baseScore * (2 ** (count - 3))
                 groups.append((score, diceList))
-                # Remove these from consideration for singles
+                
                 for die in diceList:
                     remainingValues.remove(die)
         
-        # Find singles in the remaining dice
         for val in remainingValues:
             if val == 1:
                 groups.append((100, [1]))
@@ -148,3 +152,4 @@ class Game:
     def showScores(self):
         playerObj = self.players[self.currentPlayer]
         print(f"{playerObj.name}'s score is now: {playerObj.getTotalScore()}")
+
