@@ -1,4 +1,7 @@
-
+# main.py
+# Tobias Mullins
+# CSC-220 Final Project
+# July 21, 2025
 
     def takeTurn(self, turnTotal=0):
         self.p.rollDice()
