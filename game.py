@@ -136,6 +136,7 @@ class Game:
             if len(counts) == 6: # 1-2-3-4-5-6 straight
                 groups.append((1500, sorted(diceValues)))
                 return groups
+            if len(counts) == 3 and all(v == 2 for v in counts.values()):
             if len(counts) == 3 and all(v == 2 for v in counts.values()): # 3 pairs
                 groups.append((1500, sorted(diceValues)))
                 return groups
